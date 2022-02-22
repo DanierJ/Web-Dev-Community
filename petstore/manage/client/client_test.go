@@ -1,4 +1,4 @@
-package pet_test
+package client
 
 import (
 	"log"
@@ -44,19 +44,19 @@ func Test_Create(t *testing.T) {
 	transaction(func(tx *pop.Connection) {
 		r := require.New(t)
 
-		pets := []models.Pet{
-			{Animal: "Perro", Age: 12, Breed: "Pincher", Price: 200.23},
+		clients := []models.Client{
+			{Name: "John", LastName: "Doe", Email: "johndoe@test.com", Phone: "123-777-8765", Gender: "M", Age: 24, Address: "St Jordi 234"},
 		}
 
-		err := tx.Create(&pets)
+		err := tx.Create(&clients)
 		if err != nil {
 			return
 		}
 
-		var createdPets []models.Pet
-		r.NoError(tx.All(&createdPets))
+		var createdClients []models.Client
+		r.NoError(tx.All(&createdClients))
 
-		r.Equal(1, len(createdPets))
+		r.Equal(1, len(createdClients))
 	})
 }
 
@@ -67,17 +67,17 @@ func Test_List(t *testing.T) {
 
 	transaction(func(tx *pop.Connection) {
 		r := require.New(t)
-		pets := models.Pets{}.Init(tx)
-		createdPets := models.Pets{}
-		r.NoError(tx.All(&createdPets))
+		clients := models.Clients{}.Init(tx)
+		createdClients := models.Clients{}
+		r.NoError(tx.All(&createdClients))
 
-		r.Equal(len(pets), len(createdPets))
+		r.Equal(len(createdClients), len(createdClients))
 
-		for i, pet := range pets {
-			r.Equal(pet.Animal, createdPets[i].Animal)
+		for i, client := range clients {
+			r.Equal(client.Name, createdClients[i].Name)
 		}
 
-		createdPets.Display(table.StyleLight)
+		createdClients.Display(table.StyleLight)
 	})
 }
 
@@ -88,16 +88,16 @@ func Test_Find(t *testing.T) {
 
 	transaction(func(tx *pop.Connection) {
 		r := require.New(t)
-		pets := models.Pets{}.Init(tx)
-		r.Equal(true, len(pets) > 0)
+		clients := models.Clients{}.Init(tx)
+		r.Equal(true, len(clients) > 0)
 
-		petsFoundByAnimalName := models.Pet{}.FindByAnimalName("Perro", tx)
-		petsFoundByPrice := models.Pet{}.FindByPrice(models.GREATER_THAN, 200.3, tx)
-		petsFoundByAge := models.Pet{}.FindByAge(12, "mm", tx)
+		clientsFoundByNameLastname := models.Client{}.FindByNameLastname("pepo", tx)
+		clientsFoundByEmail := models.Client{}.FindByEmail("my email", tx)
+		clientsPetsFound := models.Client{}.FindPets(tx)
 
-		petsFoundByAnimalName.Display(table.StyleLight)
-		petsFoundByPrice.Display(table.StyleLight)
-		petsFoundByAge.Display(table.StyleLight)
+		clientsFoundByNameLastname.Display(table.StyleLight)
+		clientsFoundByEmail.Display(table.StyleLight)
+		clientsPetsFound.Display(table.StyleLight)
 
 		// r.Fail(`Animal. Ejemplo: mostrar las mascotas que sean 'perros' o mostrar las que sean 'gatos'
 		// Precio (Hasta X monto inclusive). Ejemplo :mostrar las mascotas que estén por debajo de $700.000.
@@ -113,19 +113,19 @@ func Test_Destroy(t *testing.T) {
 
 	transaction(func(tx *pop.Connection) {
 		r := require.New(t)
-		pets := models.Pets{}.Init(tx)
+		clients := models.Clients{}.Init(tx)
 
-		r.Equal(true, len(pets) > 0)
+		r.Equal(true, len(clients) > 0)
 
-		pID := pets[0].ID
+		cID := clients[0].ID
 
-		r.NoError(tx.Destroy(&pets[0]))
+		r.NoError(tx.Destroy(&clients[0]))
 
-		p := models.Pet{}
+		c := models.Client{}
 
-		r.Error(tx.Find(&p, pID))
+		r.Error(tx.Find(&c, cID))
 
-		r.Empty(p)
+		r.Empty(c)
 
 		//r.Fail("Que se puedan remover o eliminar entidades")
 	})
@@ -138,16 +138,16 @@ func Test_Update(t *testing.T) {
 
 	transaction(func(tx *pop.Connection) {
 		r := require.New(t)
-		pets := models.Pets{}.Init(tx)
-		r.Equal(true, len(pets) > 0)
+		clients := models.Clients{}.Init(tx)
+		r.Equal(true, len(clients) > 0)
 
-		oldPet := pets[0]
+		oldClient := clients[0]
 
-		pets[0].Price = 700.5
+		clients[0].Name = "Robb"
 
-		r.NoError(tx.Update(&pets[0]))
+		r.NoError(tx.Update(&clients[0]))
 
-		r.NotEqual(oldPet.Price, pets[0].Price)
+		r.NotEqual(oldClient.Name, clients[0].Name)
 
 		//r.Fail("Que se puedan actualizar entidades")
 	})

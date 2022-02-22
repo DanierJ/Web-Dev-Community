@@ -1,0 +1,6 @@
+create_table("clients_pets") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("client_id", "uuid", {})
+	t.Column("pet_id", "uuid", {})
+	t.Timestamps()
+}
